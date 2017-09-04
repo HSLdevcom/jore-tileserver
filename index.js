@@ -1,4 +1,4 @@
-
+const path = require("path");
 const express = require("express");
 const { Pool } = require("pg");
 const SphericalMercator = require("@mapbox/sphericalmercator");
@@ -24,6 +24,19 @@ app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
+});
+
+app.get("/stops/index.json", (req, res) => {
+    const protocol = req.headers["x-forwarded-proto"] || req.protocol;
+    const host = req.headers["x-forwarded-host"] || req.headers.host;
+    const directory = path.dirname(req.headers["x-forwarded-path"] || req.path);
+
+    const tileJSON = {
+        "tilejson": "2.2.0",
+        "tiles": [`${protocol}://${host}${directory}/{z}/{x}/{y}.pbf`],
+    };
+    res.setHeader("Content-Type", "application/json");
+    res.send(tileJSON);
 });
 
 app.get("/stops/:z/:x/:y.pbf", (req, res) => {
