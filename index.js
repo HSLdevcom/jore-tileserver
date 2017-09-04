@@ -20,6 +20,12 @@ const app = express();
 const pool = new Pool({ connectionString: process.env.PG_CONNECTION_STRING });
 const mercator = new SphericalMercator();
 
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 app.get("/stops/:z/:x/:y.pbf", (req, res) => {
     const bbox = mercator.bbox(req.params.x, req.params.y, req.params.z);
     const values = [...bbox, 4326];
