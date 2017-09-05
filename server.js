@@ -21,10 +21,11 @@ class TileServer {
             const protocol = req.headers["x-forwarded-proto"] || req.protocol;
             const host = req.headers["x-forwarded-host"] || req.headers.host;
             const directory = path.dirname(req.headers["x-forwarded-path"] || req.path);
+            const params = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
 
             const tileJSON = {
                 "tilejson": "2.2.0",
-                "tiles": [`${protocol}://${host}${directory}/{z}/{x}/{y}.pbf`],
+                "tiles": [`${protocol}://${host}${directory}/{z}/{x}/{y}.pbf${params}`],
             };
             res.setHeader("Content-Type", "application/json");
             res.send(tileJSON);
@@ -32,7 +33,8 @@ class TileServer {
 
         this.app.get(`/${name}/:z/:x/:y.pbf`, (req, res) => {
             const bbox = this.mercator.bbox(req.params.x, req.params.y, req.params.z);
-            const values = [...bbox, 4326];
+            const date = Date.parse(req.query.date) ? new Date(req.query.date) : new Date();
+            const values = [...bbox, date];
 
             this.pool.query(query, values)
                 .then((result) => {
