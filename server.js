@@ -27,7 +27,6 @@ class TileServer {
                 "tilejson": "2.2.0",
                 "tiles": [`${protocol}://${host}${directory}/{z}/{x}/{y}.pbf${params}`],
             };
-            res.setHeader("Content-Type", "application/json");
             res.send(tileJSON);
         });
 
@@ -43,6 +42,7 @@ class TileServer {
                 })
                 .catch((error) => {
                     console.error(error);
+                    res.status(500).send({ error: error.message });
                 });
         });
     }
