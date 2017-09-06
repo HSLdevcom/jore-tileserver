@@ -4,10 +4,10 @@ const stopsQuery = `
     SELECT ST_AsMVT('stops', 4096, 'geom', rows)
     FROM (
         SELECT
-            stop_id,
-            short_id,
-            name_fi,
-            name_se,
+            stop_id AS "stopId",
+            short_id AS "shortId",
+            name_fi AS "nameFi",
+            name_se AS "nameSe",
             jore.stop_modes(stop.*, $5) AS type,
             ST_AsMVTGeom(ST_Transform(point, 3857), ST_MakeEnvelope($1, $2, $3, $4, 3857), 4096, 0, false) AS geom
         FROM jore.stop stop
@@ -18,10 +18,10 @@ const routesQuery = `
     SELECT ST_AsMVT('routes', 4096, 'geom', rows)
     FROM (
         SELECT
-            route_id,
+            route_id AS "routeId",
+            date_begin AS "dateBegin",
+            date_end AS "dateEnd",
             direction,
-            date_begin,
-            date_end,
             mode,
             ST_AsMVTGeom(ST_Transform(geom, 3857), ST_MakeEnvelope($1, $2, $3, $4, 3857), 4096, 0, true) AS geom
         FROM jore.geometry geometry
