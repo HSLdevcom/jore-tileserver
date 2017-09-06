@@ -9,9 +9,9 @@ const stopsQuery = `
             name_fi,
             name_se,
             jore.stop_modes(stop.*, $5) AS type,
-            ST_AsMVTGeom(point, ST_MakeEnvelope($1, $2, $3, $4, 4326), 4096, 0, false) AS geom
+            ST_AsMVTGeom(ST_Transform(point, 3857), ST_MakeEnvelope($1, $2, $3, $4, 3857), 4096, 0, false) AS geom
         FROM jore.stop stop
-        WHERE point && ST_MakeEnvelope($1, $2, $3, $4, 4326)
+        WHERE ST_Transform(point, 3857) && ST_MakeEnvelope($1, $2, $3, $4, 3857)
     ) AS rows`;
 
 const tileServer = new TileServer({ connectionString: process.env.PG_CONNECTION_STRING });

@@ -31,7 +31,8 @@ class TileServer {
         });
 
         this.app.get(`/${name}/:z/:x/:y.pbf`, (req, res) => {
-            const bbox = this.mercator.bbox(req.params.x, req.params.y, req.params.z);
+            const { x, y, z } = req.params;
+            const bbox = this.mercator.bbox(x, y, z, false, "900913");
             const date = Date.parse(req.query.date) ? new Date(req.query.date) : new Date();
             const values = [...bbox, date];
 
