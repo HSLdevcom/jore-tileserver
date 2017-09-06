@@ -9,23 +9,23 @@ const stopsQuery = `
             name_fi,
             name_se,
             jore.stop_modes(stop.*, $5) AS type,
-            ST_AsMVTGeom(ST_Transform(point, 3857), ST_MakeEnvelope($1, $2, $3, $4, 3857), 4096, 0, false) AS geom
+            ST_AsMVTGeom(ST_Transform(point, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, false) AS geom
         FROM jore.stop stop
-        WHERE ST_Transform(point, 3857) && ST_MakeEnvelope($1, $2, $3, $4, 3857)
+        WHERE point && ST_MakeEnvelope($1, $2, $3, $4, 4326)
     ) AS rows`;
 
 const routesQuery = `
     SELECT ST_AsMVT('routes', 4096, 'geom', rows)
     FROM (
         SELECT
-            route_id,
             direction,
+            route_id,
             date_begin,
             date_end,
             mode,
-            ST_AsMVTGeom(ST_Transform(geom, 3857), ST_MakeEnvelope($1, $2, $3, $4, 3857), 4096, 0, true) AS geom
+            ST_AsMVTGeom(ST_Transform(geom, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, true) AS geom
         FROM jore.geometry geometry
-        WHERE $5 between date_begin and date_end and ST_Intersects(ST_Transform(geom, 3857), ST_MakeEnvelope($1, $2, $3, $4, 3857))
+        WHERE $5 between date_begin and date_end and ST_Intersects(geom, ST_MakeEnvelope($1, $2, $3, $4, 4326))
     ) AS rows`;
 
 const tileServer = new TileServer({ connectionString: process.env.PG_CONNECTION_STRING });
