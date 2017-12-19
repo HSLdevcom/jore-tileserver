@@ -14,6 +14,8 @@ RUN yarn install
 # Copy app source
 COPY . ${WORK}
 
+RUN yarn lint
+
 EXPOSE 3000
 
 CMD yarn start
