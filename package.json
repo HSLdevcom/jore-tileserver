@@ -8,9 +8,14 @@
     "express": "^4.15.4",
     "pg": "^7.3.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint": "^4.13.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.8.0"
+  },
   "scripts": {
     "start": "node index.js",
+    "lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
