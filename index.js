@@ -23,6 +23,17 @@ const routesQuery = `
             date_begin AS "dateBegin",
             date_end AS "dateEnd",
             mode,
+            jore.route_has_regular_day_departures(
+              (
+                select route
+                from jore.route route
+                where geometry.route_id = route.route_id
+                  and geometry.direction = route.direction
+                  and route.date_begin <= geometry.date_end
+                  and route.date_end >= geometry.date_begin
+              ),
+              $5
+          ) as "hasRegularDayDepartures",
             ST_AsMVTGeom(ST_Transform(geom, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, true) AS geom
         FROM jore.geometry geometry
         WHERE $5 between date_begin and date_end and ST_Intersects(geom, ST_MakeEnvelope($1, $2, $3, $4, 4326))
