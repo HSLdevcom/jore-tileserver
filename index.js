@@ -1,7 +1,7 @@
 const TileServer = require('./server');
 
 const stopsQuery = `
-    SELECT ST_AsMVT('stops', 4096, 'geom', rows)
+    SELECT ST_AsMVT(rows, 'stops', 4096, 'geom')
     FROM (
         SELECT
             stop_id AS "stopId",
@@ -15,7 +15,7 @@ const stopsQuery = `
     ) AS rows`;
 
 const routesQuery = `
-    SELECT ST_AsMVT('routes', 4096, 'geom', rows)
+    SELECT ST_AsMVT(rows, 'routes', 4096, 'geom')
     FROM (
         SELECT
             direction,
@@ -39,9 +39,25 @@ const routesQuery = `
         WHERE $5 between date_begin and date_end and ST_Intersects(geom, ST_MakeEnvelope($1, $2, $3, $4, 4326))
     ) AS rows`;
 
+const terminalsQuery = `
+    SELECT ST_AsMVT(rows, 'terminals', 4096, 'geom')
+    FROM (
+        SELECT
+            terminal_id AS "terminalId",
+            name_fi AS "nameFi",
+            name_se AS "nameSe",
+            jore.terminal_modes(terminal, $5) AS mode,
+            ST_AsMVTGeom(ST_Transform(point, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, false) AS geom
+        FROM
+            jore.terminal terminal
+        WHERE
+            ST_Intersects(point, ST_MakeEnvelope($1, $2, $3, $4, 4326))
+    ) as rows`;
+
 const tileServer = new TileServer({ connectionString: process.env.PG_CONNECTION_STRING });
 
 tileServer.addLayer({ name: 'stops', query: stopsQuery });
 tileServer.addLayer({ name: 'routes', query: routesQuery });
+tileServer.addLayer({ name: 'terminals', query: terminalsQuery });
 
 tileServer.listen(3000);
