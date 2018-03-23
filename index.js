@@ -30,6 +30,7 @@ const stopsQuery = `
             short_id AS "shortId",
             name_fi AS "nameFi",
             name_se AS "nameSe",
+            terminal_id AS "terminalId",
             jore.stop_modes(stop.*, $5) AS mode,
             ST_AsMVTGeom(ST_Transform(point, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, false) AS geom
         FROM jore.stop 
