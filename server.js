@@ -18,7 +18,9 @@ class TileServer {
 
   addLayer({ name, query }) {
     this.app.get(`/${name}/index.json`, (req, res) => {
-      const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+      // Force https. Since this app is behind a proxy, and SSL has been terminated before
+      // the proxy, the protocol is always http if we read from the headers or the incoming request.
+      const protocol = 'https'; // req.headers['x-forwarded-proto'] || req.protocol;
       const host = req.headers['x-forwarded-host'] || req.headers.host;
       const directory = path.dirname(req.headers['x-forwarded-path'] || req.path);
       const params = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
