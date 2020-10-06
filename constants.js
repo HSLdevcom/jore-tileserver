@@ -14,9 +14,9 @@ const secretsEnv = mapValues(process.env, (value, key) => {
   const currentSecret =
     orderBy(
       matchingSecrets,
-      secret => {
+      (secret) => {
         const secretVersion = parseInt(secret[secret.length - 1], 10);
-        return isNaN(secretVersion) ? 0 : secretVersion;
+        return Number.isNaN(secretVersion) ? 0 : secretVersion;
       },
       'desc',
     )[0] || null;
