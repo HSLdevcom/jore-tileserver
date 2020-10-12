@@ -1,4 +1,5 @@
 const TileServer = require('./server');
+const { PG_CONNECTION_STRING } = require('./constants');
 
 const nearBusStopsQuery = `
     SELECT ST_AsMVT(rows, 'stops', 4096, 'geom')
@@ -139,7 +140,7 @@ const terminalsQuery = `
             ST_Intersects(point, ST_MakeEnvelope($1, $2, $3, $4, 4326))
     ) as rows`;
 
-const tileServer = new TileServer({ connectionString: process.env.PG_CONNECTION_STRING });
+const tileServer = new TileServer({ connectionString: PG_CONNECTION_STRING });
 
 tileServer.addLayer({ name: 'stops', query: stopsQuery });
 tileServer.addLayer({ name: 'routes', query: routesQuery });
