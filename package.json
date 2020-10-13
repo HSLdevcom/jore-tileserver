@@ -15,7 +15,7 @@
     "eslint-plugin-import": "^2.8.0"
   },
   "scripts": {
-    "start": "node index.js",
+    "start": "PG_CONNECTION_STRING=$PG_CONNECTION_STRING node index.js",
     "lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
