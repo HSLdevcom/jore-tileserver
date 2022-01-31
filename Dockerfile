@@ -1,4 +1,4 @@
-FROM node:8-alpine
+FROM node:14-alpine
 
 ENV WORK /opt/jore
 
@@ -7,9 +7,8 @@ RUN mkdir -p ${WORK}
 WORKDIR ${WORK}
 
 # Install app dependencies
-COPY package.json ${WORK}
-COPY yarn.lock ${WORK}
-RUN yarn install
+COPY package.json yarn.lock ${WORK}/
+RUN yarn install && yarn cache clean
 
 # Copy app source
 COPY . ${WORK}
