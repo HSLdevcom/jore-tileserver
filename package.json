@@ -5,12 +5,12 @@
   "main": "index.js",
   "dependencies": {
     "@mapbox/sphericalmercator": "^1.0.5",
-    "express": "^4.15.4",
+    "express": "^4.17.2",
     "lodash": "^4.17.20",
-    "pg": "^7.3.0"
+    "pg": "~7"
   },
   "devDependencies": {
-    "eslint": "^4.13.1",
+    "eslint": "~4",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-plugin-import": "^2.8.0"
   },
