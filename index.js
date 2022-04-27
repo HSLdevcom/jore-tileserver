@@ -64,67 +64,68 @@ const nearBusRoutesQuery = `
     SELECT ST_AsMVT(rows, 'routes', 4096, 'geom')
     FROM (
         SELECT
-            geometry.direction,
-            geometry.route_id AS "routeId",
-            geometry.date_begin AS "dateBegin",
-            geometry.date_end AS "dateEnd",
-            geometry.mode,
-            't' as "hasRegularDayDepartures",
-            ST_AsMVTGeom(ST_Transform(geometry.geom, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, true) AS geom
-        FROM jore.geometry geometry
-        LEFT JOIN jore.route route
-        ON geometry.route_id = route.route_id
+            r.direction,
+            r.route_id AS "routeId",
+            r.date_begin AS "dateBegin",
+            r.date_end AS "dateEnd",
+            g.mode,
+            l.trunk_route,
+            jore.route_has_regular_day_departures(r, $5) as "hasRegularDayDepartures",
+            ST_AsMVTGeom(ST_Transform(g.geom, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, true) AS geom
+        FROM jore.route r
+        INNER JOIN jore.geometry g
+        ON r.route_id = g.route_id AND r.direction = g.direction AND r.date_begin = g.date_begin AND r.date_end = g.date_end
+        LEFT JOIN jore.line l
+        ON r.line_id = l.line_id AND $5 BETWEEN l.date_begin AND l.date_end
         WHERE
-            $5 between geometry.date_begin and geometry.date_end
-            AND ST_Intersects(geometry.geom, ST_MakeEnvelope($1, $2, $3, $4, 4326))
-            AND route.type = '21'
+            $5 BETWEEN r.date_begin AND r.date_end
+            AND ST_Intersects(g.geom, ST_MakeEnvelope($1, $2, $3, $4, 4326))
+            AND r.type = '21'
     ) AS rows`;
 
 const regularRoutesQuery = `
     SELECT ST_AsMVT(rows, 'routes', 4096, 'geom')
     FROM (
         SELECT
-            geometry.direction,
-            geometry.route_id AS "routeId",
-            geometry.date_begin AS "dateBegin",
-            geometry.date_end AS "dateEnd",
-            geometry.mode,
-            't' as "hasRegularDayDepartures",
-            ST_AsMVTGeom(ST_Transform(geometry.geom, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, true) AS geom
-        FROM jore.geometry geometry
-        LEFT JOIN jore.route route
-        ON geometry.route_id = route.route_id
+            r.direction,
+            r.route_id AS "routeId",
+            r.date_begin AS "dateBegin",
+            r.date_end AS "dateEnd",
+            g.mode,
+            l.trunk_route,
+            jore.route_has_regular_day_departures(r, $5) as "hasRegularDayDepartures",
+            ST_AsMVTGeom(ST_Transform(g.geom, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, true) AS geom
+        FROM jore.route r
+        INNER JOIN jore.geometry g
+        ON r.route_id = g.route_id AND r.direction = g.direction AND r.date_begin = g.date_begin AND r.date_end = g.date_end
+        LEFT JOIN jore.line l
+        ON r.line_id = l.line_id AND $5 BETWEEN l.date_begin AND l.date_end
         WHERE
-            $5 between geometry.date_begin and geometry.date_end
-            AND ST_Intersects(geometry.geom, ST_MakeEnvelope($1, $2, $3, $4, 4326))
-            AND route.type != '21'
+            $5 between r.date_begin and r.date_end
+            AND ST_Intersects(g.geom, ST_MakeEnvelope($1, $2, $3, $4, 4326))
+            AND r.type != '21'
     ) AS rows`;
 
 const routesQuery = `
     SELECT ST_AsMVT(rows, 'routes', 4096, 'geom')
     FROM (
         SELECT
-            direction,
-            route_id AS "routeId",
-            date_begin AS "dateBegin",
-            date_end AS "dateEnd",
-            mode,
-            lines.trunk_route,
-            jore.route_has_regular_day_departures(
-              (
-                select route
-                from jore.route route
-                where geometry.route_id = route.route_id
-                  and geometry.direction = route.direction
-                  and route.date_begin <= geometry.date_end
-                  and route.date_end >= geometry.date_begin
-              ),
-              $5
-          ) as "hasRegularDayDepartures",
+            r.direction,
+            r.route_id AS "routeId",
+            r.date_begin AS "dateBegin",
+            r.date_end AS "dateEnd",
+            g.mode,
+            l.trunk_route,
+            jore.route_has_regular_day_departures(r, $5) as "hasRegularDayDepartures",
             ST_AsMVTGeom(ST_Transform(geom, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, true) AS geom
-        FROM jore.geometry geometry
-            left join (select line_id, trunk_route from jore.line) as lines on geometry.route_id = lines.line_id 
-        WHERE $5 between date_begin and date_end and ST_Intersects(geom, ST_MakeEnvelope($1, $2, $3, $4, 4326))
+        FROM jore.route r
+        INNER JOIN jore.geometry g
+        ON r.route_id = g.route_id AND r.direction = g.direction AND r.date_begin = g.date_begin AND r.date_end = g.date_end
+        LEFT JOIN jore.line l
+        ON r.line_id = l.line_id AND $5 BETWEEN l.date_begin AND l.date_end
+        WHERE
+            $5 BETWEEN r.date_begin AND r.date_end
+            AND ST_Intersects(g.geom, ST_MakeEnvelope($1, $2, $3, $4, 4326))
     ) AS rows`;
 
 const terminalsQuery = `
