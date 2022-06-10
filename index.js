@@ -9,9 +9,11 @@ const nearBusStopsQuery = `
             stop.short_id AS "shortId",
             stop.name_fi AS "nameFi",
             stop.name_se AS "nameSe",
+            terminal_id AS "terminalId",
+            stop.platform as "platform",
             jore.stop_modes(stop.*, $5) AS mode,
             TO_JSON(ARRAY(
-                SELECT JSONB_BUILD_OBJECT('routeId', route_id, 'direction', direction)
+                SELECT JSONB_BUILD_OBJECT('routeId', rs.route_id, 'direction', rs.direction, 'stopIndex', rs.stop_index, 'isTimingStop', rs.timing_stop_type != 0 )
                 FROM jore.route_segment rs
                 WHERE rs.stop_id = stop.stop_id AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs.date_begin AND rs.date_end END
            )) as routes,
@@ -36,9 +38,11 @@ const regularStopsQuery = `
             stop.short_id AS "shortId",
             stop.name_fi AS "nameFi",
             stop.name_se AS "nameSe",
+            terminal_id AS "terminalId",
+            stop.platform as "platform",
             jore.stop_modes(stop.*, $5) AS mode,
             TO_JSON(ARRAY(
-                SELECT JSONB_BUILD_OBJECT('routeId', route_id, 'direction', direction)
+                SELECT JSONB_BUILD_OBJECT('routeId', rs.route_id, 'direction', rs.direction, 'stopIndex', rs.stop_index, 'isTimingStop', rs.timing_stop_type != 0 )
                 FROM jore.route_segment rs
                 WHERE rs.stop_id = stop.stop_id AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs.date_begin AND rs.date_end END
            )) as routes,
@@ -64,9 +68,10 @@ const stopsQuery = `
             name_fi AS "nameFi",
             name_se AS "nameSe",
             terminal_id AS "terminalId",
+            stop.platform as "platform",
             jore.stop_modes(stop.*, $5) AS mode,
             TO_JSON(ARRAY(
-                SELECT JSONB_BUILD_OBJECT('routeId', route_id, 'direction', direction)
+                SELECT JSONB_BUILD_OBJECT('routeId', rs.route_id, 'direction', rs.direction, 'stopIndex', rs.stop_index, 'isTimingStop', rs.timing_stop_type != 0 )
                 FROM jore.route_segment rs
                 WHERE rs.stop_id = stop.stop_id AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs.date_begin AND rs.date_end END
            )) as routes,
