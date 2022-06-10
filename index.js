@@ -10,6 +10,11 @@ const nearBusStopsQuery = `
             stop.name_fi AS "nameFi",
             stop.name_se AS "nameSe",
             jore.stop_modes(stop.*, $5) AS mode,
+            TO_JSON(ARRAY(
+                SELECT JSONB_BUILD_OBJECT('routeId', route_id, 'direction', direction)
+                FROM jore.route_segment rs
+                WHERE rs.stop_id = stop.stop_id AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs.date_begin AND rs.date_end END
+           )) as routes,
             ST_AsMVTGeom(ST_Transform(stop.point, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, false) AS geom
         FROM jore.stop stop
         WHERE EXISTS (
@@ -32,6 +37,11 @@ const regularStopsQuery = `
             stop.name_fi AS "nameFi",
             stop.name_se AS "nameSe",
             jore.stop_modes(stop.*, $5) AS mode,
+            TO_JSON(ARRAY(
+                SELECT JSONB_BUILD_OBJECT('routeId', route_id, 'direction', direction)
+                FROM jore.route_segment rs
+                WHERE rs.stop_id = stop.stop_id AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs.date_begin AND rs.date_end END
+           )) as routes,
             ST_AsMVTGeom(ST_Transform(stop.point, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, false) AS geom
         FROM jore.stop stop
         WHERE EXISTS (
@@ -55,6 +65,11 @@ const stopsQuery = `
             name_se AS "nameSe",
             terminal_id AS "terminalId",
             jore.stop_modes(stop.*, $5) AS mode,
+            TO_JSON(ARRAY(
+                SELECT JSONB_BUILD_OBJECT('routeId', route_id, 'direction', direction)
+                FROM jore.route_segment rs
+                WHERE rs.stop_id = stop.stop_id AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs.date_begin AND rs.date_end END
+           )) as routes,
             ST_AsMVTGeom(ST_Transform(point, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, false) AS geom
         FROM jore.stop 
         WHERE point && ST_MakeEnvelope($1, $2, $3, $4, 4326)
