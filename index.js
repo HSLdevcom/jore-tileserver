@@ -86,6 +86,33 @@ const stopsQuery = `
         WHERE point && ST_MakeEnvelope($1, $2, $3, $4, 4326)
     ) AS rows`;
 
+const stopsByRoutesQuery = `
+    SELECT ST_AsMVT(rows, 'stops', 4096, 'geom')
+    FROM (
+        SELECT
+            s.stop_id AS "stopId",
+            s.short_id AS "shortId",
+            s.name_fi AS "nameFi",
+            s.name_se AS "nameSe",
+            s.terminal_id AS "terminalId",
+            s.platform AS "platform",
+            jore.stop_modes(s.*, $5) AS mode,
+            EXISTS(
+                SELECT rs.stop_id
+                FROM jore.route_segment rs
+                INNER JOIN jore.route r ON r.route_id = rs.route_id AND r.date_begin = rs.date_begin AND r.date_end = rs.date_end AND r.direction = rs.direction
+                INNER JOIN jore.line l ON r.line_id = l.line_id AND r.date_begin >= l.date_begin AND r.date_end <= l.date_end
+                WHERE l.trunk_route = '1' AND rs.stop_id = s.stop_id AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs.date_begin AND rs.date_end END
+            ) AS "isTrunkStop",
+            r.route_id AS "routeId",
+            r.direction AS "direction",
+            r.stop_index AS "stopIndex",
+            r.timing_stop_type AS "timingStopType",
+            ST_AsMVTGeom(ST_Transform(point, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, false) AS geom
+        FROM jore.stop s LEFT JOIN jore.route_segment r ON r.stop_id = s.stop_id
+        WHERE s.point && ST_MakeEnvelope($1, $2, $3, $4, 4326) AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN r.date_begin AND r.date_end END
+    ) AS rows`;
+
 const nearBusRoutesQuery = `
     SELECT ST_AsMVT(rows, 'routes', 4096, 'geom')
     FROM (
@@ -178,5 +205,6 @@ tileServer.addLayer({ name: 'regular-routes', query: regularRoutesQuery });
 tileServer.addLayer({ name: 'regular-stops', query: regularStopsQuery });
 tileServer.addLayer({ name: 'near-bus-routes', query: nearBusRoutesQuery });
 tileServer.addLayer({ name: 'near-bus-stops', query: nearBusStopsQuery });
+tileServer.addLayer({ name: 'stops-by-routes', query: stopsByRoutesQuery });
 
 tileServer.listen(3000);
