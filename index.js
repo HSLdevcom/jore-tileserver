@@ -13,17 +13,12 @@ const nearBusStopsQuery = `
             stop.platform AS "platform",
             jore.stop_modes(stop.*, $5) AS mode,
             EXISTS(
-                SELECT rs1.stop_id
-                FROM jore.route_segment rs1
-                INNER JOIN jore.route r ON r.route_id = rs1.route_id AND r.date_begin = rs1.date_begin AND r.date_end = rs1.date_end AND r.direction = rs1.direction
+                SELECT rs.stop_id
+                FROM jore.route_segment rs
+                INNER JOIN jore.route r ON r.route_id = rs.route_id AND r.date_begin = rs.date_begin AND r.date_end = rs.date_end AND r.direction = rs.direction
                 INNER JOIN jore.line l ON r.line_id = l.line_id AND r.date_begin >= l.date_begin AND r.date_end <= l.date_end
-                WHERE l.trunk_route = '1' AND rs1.stop_id = stop.stop_id AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs1.date_begin AND rs1.date_end END
+                WHERE l.trunk_route = '1' AND rs.stop_id = stop.stop_id AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs.date_begin AND rs.date_end END
             ) AS "isTrunkStop",
-            TO_JSON(ARRAY(
-                SELECT JSONB_BUILD_OBJECT('routeId', rs2.route_id, 'direction', rs2.direction, 'stopIndex', rs2.stop_index, 'isTimingStop', rs2.timing_stop_type != 0 )
-                FROM jore.route_segment rs2
-                WHERE rs2.stop_id = stop.stop_id AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs2.date_begin AND rs2.date_end END
-           )) AS routes,
             ST_AsMVTGeom(ST_Transform(stop.point, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, false) AS geom
         FROM jore.stop stop
         WHERE EXISTS (
@@ -49,17 +44,12 @@ const regularStopsQuery = `
             stop.platform AS "platform",
             jore.stop_modes(stop.*, $5) AS mode,
             EXISTS(
-                SELECT rs1.stop_id
-                FROM jore.route_segment rs1
-                INNER JOIN jore.route r ON r.route_id = rs1.route_id AND r.date_begin = rs1.date_begin AND r.date_end = rs1.date_end AND r.direction = rs1.direction
+                SELECT rs.stop_id
+                FROM jore.route_segment rs
+                INNER JOIN jore.route r ON r.route_id = rs.route_id AND r.date_begin = rs.date_begin AND r.date_end = rs.date_end AND r.direction = rs.direction
                 INNER JOIN jore.line l ON r.line_id = l.line_id AND r.date_begin >= l.date_begin AND r.date_end <= l.date_end
-                WHERE l.trunk_route = '1' AND rs1.stop_id = stop.stop_id AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs1.date_begin AND rs1.date_end END
+                WHERE l.trunk_route = '1' AND rs.stop_id = stop.stop_id AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs.date_begin AND rs.date_end END
             ) AS "isTrunkStop",
-            TO_JSON(ARRAY(
-                SELECT JSONB_BUILD_OBJECT('routeId', rs2.route_id, 'direction', rs2.direction, 'stopIndex', rs2.stop_index, 'isTimingStop', rs2.timing_stop_type != 0 )
-                FROM jore.route_segment rs2
-                WHERE rs2.stop_id = stop.stop_id AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs2.date_begin AND rs2.date_end END
-           )) AS routes,
             ST_AsMVTGeom(ST_Transform(stop.point, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, false) AS geom
         FROM jore.stop stop
         WHERE EXISTS (
@@ -85,17 +75,12 @@ const stopsQuery = `
             stop.platform AS "platform",
             jore.stop_modes(stop.*, $5) AS mode,
             EXISTS(
-                SELECT rs1.stop_id
-                FROM jore.route_segment rs1
-                INNER JOIN jore.route r ON r.route_id = rs1.route_id AND r.date_begin = rs1.date_begin AND r.date_end = rs1.date_end AND r.direction = rs1.direction
+                SELECT rs.stop_id
+                FROM jore.route_segment rs
+                INNER JOIN jore.route r ON r.route_id = rs.route_id AND r.date_begin = rs.date_begin AND r.date_end = rs.date_end AND r.direction = rs.direction
                 INNER JOIN jore.line l ON r.line_id = l.line_id AND r.date_begin >= l.date_begin AND r.date_end <= l.date_end
-                WHERE l.trunk_route = '1' AND rs1.stop_id = stop.stop_id AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs1.date_begin AND rs1.date_end END
+                WHERE l.trunk_route = '1' AND rs.stop_id = stop.stop_id AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs.date_begin AND rs.date_end END
             ) AS "isTrunkStop",
-            TO_JSON(ARRAY(
-                SELECT JSONB_BUILD_OBJECT('routeId', rs2.route_id, 'direction', rs2.direction, 'stopIndex', rs2.stop_index, 'isTimingStop', rs2.timing_stop_type != 0 )
-                FROM jore.route_segment rs2
-                WHERE rs2.stop_id = stop.stop_id AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs2.date_begin AND rs2.date_end END
-           )) AS routes,
             ST_AsMVTGeom(ST_Transform(point, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, false) AS geom
         FROM jore.stop 
         WHERE point && ST_MakeEnvelope($1, $2, $3, $4, 4326)
