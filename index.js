@@ -16,8 +16,12 @@ const nearBusStopsQuery = `
                 SELECT rs.stop_id
                 FROM jore.route_segment rs
                 INNER JOIN jore.route r ON r.route_id = rs.route_id AND r.date_begin = rs.date_begin AND r.date_end = rs.date_end AND r.direction = rs.direction
-                INNER JOIN jore.line l ON r.line_id = l.line_id AND r.date_begin >= l.date_begin AND r.date_end <= l.date_end
-                WHERE l.trunk_route = '1' AND rs.stop_id = stop.stop_id AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs.date_begin AND rs.date_end END
+                INNER JOIN jore.line l ON r.line_id = l.line_id
+                WHERE
+                    l.trunk_route = '1' AND
+                    rs.stop_id = stop.stop_id AND
+                    CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs.date_begin AND rs.date_end END AND
+                    CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN l.date_begin AND l.date_end END
             ) AS "isTrunkStop",
             ST_AsMVTGeom(ST_Transform(stop.point, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, false) AS geom
         FROM jore.stop stop
@@ -47,8 +51,12 @@ const regularStopsQuery = `
                 SELECT rs.stop_id
                 FROM jore.route_segment rs
                 INNER JOIN jore.route r ON r.route_id = rs.route_id AND r.date_begin = rs.date_begin AND r.date_end = rs.date_end AND r.direction = rs.direction
-                INNER JOIN jore.line l ON r.line_id = l.line_id AND r.date_begin >= l.date_begin AND r.date_end <= l.date_end
-                WHERE l.trunk_route = '1' AND rs.stop_id = stop.stop_id AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs.date_begin AND rs.date_end END
+                INNER JOIN jore.line l ON r.line_id = l.line_id
+                WHERE
+                    l.trunk_route = '1' AND
+                    rs.stop_id = stop.stop_id AND
+                    CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs.date_begin AND rs.date_end END AND
+                    CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN l.date_begin AND l.date_end END
             ) AS "isTrunkStop",
             ST_AsMVTGeom(ST_Transform(stop.point, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, false) AS geom
         FROM jore.stop stop
@@ -78,11 +86,15 @@ const stopsQuery = `
                 SELECT rs.stop_id
                 FROM jore.route_segment rs
                 INNER JOIN jore.route r ON r.route_id = rs.route_id AND r.date_begin = rs.date_begin AND r.date_end = rs.date_end AND r.direction = rs.direction
-                INNER JOIN jore.line l ON r.line_id = l.line_id AND r.date_begin >= l.date_begin AND r.date_end <= l.date_end
-                WHERE l.trunk_route = '1' AND rs.stop_id = stop.stop_id AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs.date_begin AND rs.date_end END
+                INNER JOIN jore.line l ON r.line_id = l.line_id
+                WHERE
+                    l.trunk_route = '1' AND
+                    rs.stop_id = stop.stop_id AND
+                    CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs.date_begin AND rs.date_end END AND
+                    CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN l.date_begin AND l.date_end END
             ) AS "isTrunkStop",
             ST_AsMVTGeom(ST_Transform(point, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, false) AS geom
-        FROM jore.stop 
+        FROM jore.stop stop
         WHERE point && ST_MakeEnvelope($1, $2, $3, $4, 4326)
     ) AS rows`;
 
@@ -101,8 +113,12 @@ const stopsByRoutesQuery = `
                 SELECT rs.stop_id
                 FROM jore.route_segment rs
                 INNER JOIN jore.route r ON r.route_id = rs.route_id AND r.date_begin = rs.date_begin AND r.date_end = rs.date_end AND r.direction = rs.direction
-                INNER JOIN jore.line l ON r.line_id = l.line_id AND r.date_begin >= l.date_begin AND r.date_end <= l.date_end
-                WHERE l.trunk_route = '1' AND rs.stop_id = s.stop_id AND CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs.date_begin AND rs.date_end END
+                INNER JOIN jore.line l ON r.line_id = l.line_id
+                WHERE
+                    l.trunk_route = '1' AND
+                    rs.stop_id = s.stop_id AND
+                    CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN rs.date_begin AND rs.date_end END AND
+                    CASE WHEN $5 IS NULL THEN TRUE ELSE $5 BETWEEN l.date_begin AND l.date_end END
             ) AS "isTrunkStop",
             r.route_id AS "routeId",
             r.direction AS "direction",
