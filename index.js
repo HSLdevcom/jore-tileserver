@@ -137,6 +137,7 @@ const nearBusRoutesQuery = `
         SELECT
             r.direction,
             r.route_id AS "routeId",
+            r.route_id_parsed AS "routeIdParsed",
             r.date_begin AS "dateBegin",
             r.date_end AS "dateEnd",
             g.mode,
@@ -145,7 +146,7 @@ const nearBusRoutesQuery = `
             ST_AsMVTGeom(ST_Transform(g.geom, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, true) AS geom
         FROM jore.route r
         INNER JOIN jore.geometry g
-        ON r.route_id = g.route_id AND r.direction = g.direction AND r.date_begin = g.date_begin AND r.date_end = g.date_end
+        ON r.route_id = g.route_id AND r.route_id_parsed = g.route_id_parsed AND r.direction = g.direction AND r.date_begin = g.date_begin AND r.date_end = g.date_end
         LEFT JOIN jore.line l
         ON r.line_id = l.line_id AND $5 BETWEEN l.date_begin AND l.date_end
         WHERE
@@ -160,6 +161,7 @@ const regularRoutesQuery = `
         SELECT
             r.direction,
             r.route_id AS "routeId",
+            r.route_id_parsed AS "routeIdParsed",
             r.date_begin AS "dateBegin",
             r.date_end AS "dateEnd",
             g.mode,
@@ -168,7 +170,7 @@ const regularRoutesQuery = `
             ST_AsMVTGeom(ST_Transform(g.geom, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, true) AS geom
         FROM jore.route r
         INNER JOIN jore.geometry g
-        ON r.route_id = g.route_id AND r.direction = g.direction AND r.date_begin = g.date_begin AND r.date_end = g.date_end
+        ON r.route_id = g.route_id AND r.route_id_parsed = g.route_id_parsed AND r.direction = g.direction AND r.date_begin = g.date_begin AND r.date_end = g.date_end
         LEFT JOIN jore.line l
         ON r.line_id = l.line_id AND $5 BETWEEN l.date_begin AND l.date_end
         WHERE
@@ -183,6 +185,7 @@ const routesQuery = `
         SELECT
             r.direction,
             r.route_id AS "routeId",
+            r.route_id_parsed AS "routeIdParsed",
             r.date_begin AS "dateBegin",
             r.date_end AS "dateEnd",
             g.mode,
@@ -191,7 +194,7 @@ const routesQuery = `
             ST_AsMVTGeom(ST_Transform(geom, 3857), ST_Transform(ST_MakeEnvelope($1, $2, $3, $4, 4326), 3857), 4096, 0, true) AS geom
         FROM jore.route r
         INNER JOIN jore.geometry g
-        ON r.route_id = g.route_id AND r.direction = g.direction AND r.date_begin = g.date_begin AND r.date_end = g.date_end
+        ON r.route_id = g.route_id AND r.route_id_parsed = g.route_id_parsed AND r.direction = g.direction AND r.date_begin = g.date_begin AND r.date_end = g.date_end
         LEFT JOIN jore.line l
         ON r.line_id = l.line_id AND $5 BETWEEN l.date_begin AND l.date_end
         WHERE
