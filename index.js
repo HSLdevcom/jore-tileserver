@@ -137,6 +137,7 @@ const nearBusRoutesQuery = `
         SELECT
             r.direction,
             r.route_id AS "routeId",
+            r.route_id_parsed AS "routeIdParsed",
             r.date_begin AS "dateBegin",
             r.date_end AS "dateEnd",
             g.mode,
@@ -160,6 +161,7 @@ const regularRoutesQuery = `
         SELECT
             r.direction,
             r.route_id AS "routeId",
+            r.route_id_parsed AS "routeIdParsed",
             r.date_begin AS "dateBegin",
             r.date_end AS "dateEnd",
             g.mode,
@@ -183,6 +185,7 @@ const routesQuery = `
         SELECT
             r.direction,
             r.route_id AS "routeId",
+            r.route_id_parsed AS "routeIdParsed",
             r.date_begin AS "dateBegin",
             r.date_end AS "dateEnd",
             g.mode,
