@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 const { Pool } = require('pg');
 const SphericalMercator = require('@mapbox/sphericalmercator');
+const zlib = require('node:zlib');
 
 class TileServer {
   constructor(pgOptions) {
@@ -41,7 +42,8 @@ class TileServer {
       this.pool.query(query, values)
         .then((result) => {
           res.setHeader('Content-Type', 'application/x-protobuf');
-          res.send(result.rows[0].st_asmvt);
+          res.setHeader('Content-Encoding', 'gzip');
+          zlib.gzip(result.rows[0].st_asmvt, (err, data) => res.send(data));
         })
         .catch((error) => {
           console.error(error); // eslint-disable-line no-console
