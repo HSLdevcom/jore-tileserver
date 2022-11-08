@@ -1,6 +1,7 @@
 FROM node:16-alpine
 
 ENV WORK /opt/jore
+ENV NODE_ENV production
 
 # Create app directory
 RUN mkdir -p ${WORK}

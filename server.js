@@ -2,11 +2,14 @@ const path = require('path');
 const express = require('express');
 const { Pool } = require('pg');
 const SphericalMercator = require('@mapbox/sphericalmercator');
+const zlib = require('node:zlib');
+const NodeCache = require('node-cache');
 
 class TileServer {
   constructor(pgOptions) {
     this.app = express();
     this.pool = new Pool(pgOptions);
+    this.cache = new NodeCache({ stdTTL: 3600 });
     this.mercator = new SphericalMercator();
 
     this.app.use((req, res, next) => {
@@ -33,6 +36,14 @@ class TileServer {
     });
 
     this.app.get(`/${name}/:z/:x/:y.pbf`, (req, res) => {
+      const key = `${req.url}?${req.query.date || ''}`;
+
+      if (this.cache.has(key)) {
+        res.setHeader('Content-Type', 'application/x-protobuf');
+        res.setHeader('Content-Encoding', 'gzip');
+        res.send(this.cache.get(key));
+        return;
+      }
       const { x, y, z } = req.params;
       const bbox = this.mercator.bbox(x, y, z);
       const date = Date.parse(req.query.date) ? new Date(req.query.date) : new Date();
@@ -41,7 +52,11 @@ class TileServer {
       this.pool.query(query, values)
         .then((result) => {
           res.setHeader('Content-Type', 'application/x-protobuf');
-          res.send(result.rows[0].st_asmvt);
+          res.setHeader('Content-Encoding', 'gzip');
+          zlib.gzip(result.rows[0].st_asmvt, (err, data) => {
+            this.cache.set(key, data);
+            res.send(data);
+          });
         })
         .catch((error) => {
           console.error(error); // eslint-disable-line no-console
