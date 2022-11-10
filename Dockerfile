@@ -14,7 +14,8 @@ RUN yarn install && yarn cache clean
 # Copy app source
 COPY . ${WORK}
 
-RUN yarn lint
+# Linting removed because linter is not available in production mode. Configure auto-lint in other way!
+# RUN yarn lint 
 
 EXPOSE 3000
 
