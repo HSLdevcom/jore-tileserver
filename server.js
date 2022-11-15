@@ -25,7 +25,7 @@ class TileServer {
       // the proxy, the protocol is always http if we read from the headers or the incoming request.
       const protocol = 'https'; // req.headers['x-forwarded-proto'] || req.protocol;
       const host = req.headers['x-forwarded-host'] || req.headers.host;
-      const directory = path.dirname(req.headers['x-forwarded-path'] || req.path);
+      const directory = path.dirname(req.headers['x-forwarded-path'] || req.headers['x-original-url'] || req.path);
       const params = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
 
       const tileJSON = {
@@ -66,6 +66,10 @@ class TileServer {
   }
 
   listen(port) {
+    this.app.get('/health', (req, res) => {
+      res.send('OK');
+    });
+
     this.app.listen(port, () => {
       console.log(`Listening on port ${port}`); // eslint-disable-line no-console
     });
